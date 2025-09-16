@@ -18,7 +18,7 @@ def load_categorical_metadata():
     with engine.connect() as conn:
         for col in columns:
             df = pd.read_sql(
-                f"SELECT DISTINCT [{col}] FROM [dbo].[PMS_Defect_Backup_cleaned] WHERE [{col}] IS NOT NULL",
+                f"SELECT DISTINCT [{col}] FROM PMS_Defect_Backup_cleaned WHERE [{col}] IS NOT NULL",
                 conn
             )
             metadata[col] = df[col].dropna().unique().tolist()

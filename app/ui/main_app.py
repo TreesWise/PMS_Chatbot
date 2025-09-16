@@ -13,6 +13,8 @@ from langgraph.graph import  END
 import re
 import numpy as np
 
+from app.data.db import initialize_local_db
+initialize_local_db()
 # Import your custom modules
 from app.agents.router_agent import classify_intent
 from app.agents.query_generator_agent import run_query_generator
@@ -21,6 +23,9 @@ from app.agents.task_agent import run_task_agent
 from app.agents.graph_agent import check_if_graph_needed
 from app.services.chat_manager import save_chat_log
 from app.services.mask import mask_dynamic
+
+
+
 
 # --- LangGraph State Schema ---
 class BotState(TypedDict):
@@ -676,6 +681,25 @@ async def chat(request: ChatRequest):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "message": "PMS Bot API is running"}
+
+from sqlalchemy import text
+from app.data.db import create_engine
+DB_FILE = "local.db"
+engine = create_engine(f"sqlite:///{DB_FILE}")
+
+
+@app.get("/chatlog")
+def get_chatlog():
+    """Return all rows from the chat_log table."""
+    try:
+        with engine.connect() as conn:
+            df = pd.read_sql(text("SELECT * FROM chat_log"), conn)
+            # Clean NaN, Inf, -Inf for JSON serialization
+            df = df.replace([float("inf"), float("-inf")], pd.NA).where(pd.notna(df), None)
+            return {"status": "success", "data": df.to_dict(orient="records")}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 
 # Create charts directory on startup
 @app.on_event("startup")

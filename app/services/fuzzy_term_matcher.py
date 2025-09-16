@@ -16,7 +16,8 @@ def load_known_terms():
     known_terms_by_col = {}
     with engine.connect() as conn:
         for col in columns:
-            query = text(f"SELECT DISTINCT {col} FROM [dbo].[PMS_Defect_Backup_cleaned]")
+            query = text(f"SELECT DISTINCT {col} FROM PMS_Defect_Backup_cleaned")
+            # query = f"SELECT DISTINCT {col} FROM PMS_Defect_Backup_cleaned"
             results = conn.execute(query).fetchall()
             terms = [row[0].lower().strip() for row in results if row[0]]
             known_terms_by_col[col] = terms

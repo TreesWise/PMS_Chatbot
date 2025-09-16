@@ -15,7 +15,7 @@ def rewrite_and_generate_query(user_input, session_id):
         f"User: {q}\nAssistant: {a}" for q, a in history
     )
 
-
+    # Create the runnable chain
     chain = prompt | llm
 
     # Invoke chain with current follow-up question & recent history

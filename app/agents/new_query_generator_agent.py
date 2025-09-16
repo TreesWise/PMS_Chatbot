@@ -277,6 +277,70 @@ def clean_dataframe_for_json(df):
     return df_clean.to_dict(orient="records")  # Convert to list of dictionaries (JSON friendly)
 
 
+# def generate_new_query(user_input, session_id=None):
+#     """
+#     Generate and run SQL using LangChain's SQL Agent.
+#     Logs both the generated SQL and the final answer (if session_id provided).
+#     """
+#     llm = get_llm(temperature=0)
+#     db = SQLDatabase(get_db_engine())
+
+
+#     instructions = """
+#     You are a SQL expert working with the '[dbo].[PMS_Defect_Backup_cleaned]' table.
+#     Your job is to generate SQL queries based on the user's request.
+#     When answering, ALWAYS return a JSON object with two keys:
+#         - "sql" → the exact SQL query you used
+#         - "answer" → the final natural language answer to the user
+
+#         Example format:
+#         {
+#         "sql": "SELECT COUNT(*) FROM [dbo].[PMS_Defect_Backup_cleaned];",
+#         "answer": "There are 152 defects recorded."
+#         }
+#     Ensure that:
+#     1. The queries only involve the '[dbo].[PMS_Defect_Backup_cleaned]' table.
+#     2. Use the metadata provided to ensure the correct handling of column values.
+#     3. If user asks about defect text/type/keywords, search in: JOB_TITLE, DESCRIPTION, CLOSING_REPORT.
+#     4. If the query involves **multiple defect types**, generate a single SQL query that uses 
+#         **conditional aggregation** — one column per defect type.
+#         Example format (replace <keyword> dynamically with the requested defect types):
+#         ```sql
+#         SELECT 
+#             YEAR(ISSUE_DATE) AS Year,
+#             SUM(CASE WHEN JOB_TITLE LIKE '%<keyword1>%' OR DESCRIPTION LIKE '%<keyword1>%' OR CLOSING_REPORT LIKE '%<keyword1>%' THEN 1 ELSE 0 END) AS <Keyword1>_Defects,
+#             SUM(CASE WHEN JOB_TITLE LIKE '%<keyword2>%' OR DESCRIPTION LIKE '%<keyword2>%' OR CLOSING_REPORT LIKE '%<keyword2>%' THEN 1 ELSE 0 END) AS <Keyword2>_Defects,
+#             ...
+#         FROM [dbo].[PMS_Defect_Backup_cleaned]
+#         GROUP BY YEAR(ISSUE_DATE)
+#         ORDER BY Year;
+#     5. If the user asks for "last N years", filter using
+#         WHERE YEAR(ISSUE_DATE) >= YEAR(GETDATE()) - (N - 1)
+#     6. Always return the SQL query in a code block (```sql) along with your explanation.
+    
+#     Here is the metadata (data dictionary):
+
+#     • VESSEL_NAME →     Name of the vessel where the defect was reported or the maintenance job was carried out.
+#     • EQUIPMENT_CODE → Unique identifier or code assigned to a specific equipment on the vessel.
+#     • EQUIPMENT_NAME → Descriptive name of the equipment related to the defect or maintenance activity.
+#     • MAKER → Name of the manufacturer or company that produced the equipment.
+#     • MODEL → Specific model or version of the equipment provided by the manufacturer.
+#     • JOB_TITLE → Brief title or summary describing the defect or nature of the job carried out.
+#     • JOBORDER_CODE → Unique job order number/reference used to track the maintenance or repair job.
+#     • JOB_STATUS → Current state of the job (These are the job status types: 2022, 97, Cancelled, COMPLETED, EQUIPMENT NOT OPERATIONAL, Pending, Postponed, Postponed to Dry Dock, Waiting for Assistance, Waiting for Spares, Work in Progress).
+#     • DEFECT_SECTION → Section or area of the vessel where the defect occurred.
+#     • JOB_CATEGORY → Broad classification of the job such as Maintenance, Repair, or Inspection.
+#     • JOB_TYPE → Specific type of job under the category.
+#     • PRIORITY → Importance or urgency level of the job (These are the Priorities: In Use, Normal, NOT OPERATIONAL, Repair).
+#     • DESCRIPTION → Detailed explanation of the defect or job requirements.
+#     • ISSUE_DATE → Date when the defect or job was reported (YYYY-MM-DD).
+#     • RANK → Designation of the crew member.
+#     • JOB_START_DATE → Date when the job started.
+#     • JOB_END_DATE → Date when the job was completed.
+#     • CLOSING_REPORT → Final remarks upon job closure.
+#     """
+
+
 def generate_new_query(user_input, session_id=None):
     """
     Generate and run SQL using LangChain's SQL Agent.
@@ -287,7 +351,7 @@ def generate_new_query(user_input, session_id=None):
 
 
     instructions = """
-    You are a SQL expert working with the '[dbo].[PMS_Defect_Backup_cleaned]' table.
+    You are a SQL expert working with the 'PMS_Defect_Backup_cleaned' table.
     Your job is to generate SQL queries based on the user's request.
     When answering, ALWAYS return a JSON object with two keys:
         - "sql" → the exact SQL query you used
@@ -295,11 +359,11 @@ def generate_new_query(user_input, session_id=None):
 
         Example format:
         {
-        "sql": "SELECT COUNT(*) FROM [dbo].[PMS_Defect_Backup_cleaned];",
+        "sql": "SELECT COUNT(*) FROM PMS_Defect_Backup_cleaned;",
         "answer": "There are 152 defects recorded."
         }
     Ensure that:
-    1. The queries only involve the '[dbo].[PMS_Defect_Backup_cleaned]' table.
+    1. The queries only involve the 'PMS_Defect_Backup_cleaned' table.
     2. Use the metadata provided to ensure the correct handling of column values.
     3. If user asks about defect text/type/keywords, search in: JOB_TITLE, DESCRIPTION, CLOSING_REPORT.
     4. If the query involves **multiple defect types**, generate a single SQL query that uses 
@@ -311,7 +375,7 @@ def generate_new_query(user_input, session_id=None):
             SUM(CASE WHEN JOB_TITLE LIKE '%<keyword1>%' OR DESCRIPTION LIKE '%<keyword1>%' OR CLOSING_REPORT LIKE '%<keyword1>%' THEN 1 ELSE 0 END) AS <Keyword1>_Defects,
             SUM(CASE WHEN JOB_TITLE LIKE '%<keyword2>%' OR DESCRIPTION LIKE '%<keyword2>%' OR CLOSING_REPORT LIKE '%<keyword2>%' THEN 1 ELSE 0 END) AS <Keyword2>_Defects,
             ...
-        FROM [dbo].[PMS_Defect_Backup_cleaned]
+        FROM PMS_Defect_Backup_cleaned
         GROUP BY YEAR(ISSUE_DATE)
         ORDER BY Year;
     5. If the user asks for "last N years", filter using
