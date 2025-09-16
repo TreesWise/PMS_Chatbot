@@ -58,4 +58,4 @@ jobs:
         with:
           app-name: 'PMS-Chatbot-new'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6C390A8BFEC34C77B5E6B93F212BB689 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CD354DAB18C04EF9BFE4C83B666AD30E }}
